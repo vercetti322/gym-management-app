@@ -1,4 +1,4 @@
-# Gym Membership Tracker
+# Gym Management App
 
 A small, private dashboard for managing gym memberships and tracking plan renewals and payments. The app runs on Cloudflare Workers, with a React interface and a D1 database.
 
