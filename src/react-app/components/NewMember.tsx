@@ -138,7 +138,6 @@ export default function CreateMemberButton({
             </SimpleGrid>
 
             <TextInput
-              label="Address"
               placeholder="Address"
               value={address}
               onChange={(event) => setAddress(event.currentTarget.value)}
@@ -149,7 +148,6 @@ export default function CreateMemberButton({
 
             <SimpleGrid cols={2} spacing="xs">
               <TextInput
-                label="Profession"
                 placeholder="Profession"
                 value={profession}
                 onChange={(event) => setProfession(event.currentTarget.value)}
@@ -159,7 +157,6 @@ export default function CreateMemberButton({
               />
 
               <Select
-                label="Usual visit time"
                 placeholder="AM or PM"
                 data={['AM', 'PM']}
                 value={visitTime}
