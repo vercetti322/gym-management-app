@@ -664,7 +664,7 @@ export default function MemberList({
                   py={4}
                 >
                   <Stack gap={4} align="flex-start">
-                    <Text className="member-accordion-name" fw={700} lineClamp={2}>
+                    <Text className="member-accordion-name" fw={700} lineClamp={1}>
                       {m.name}
                     </Text>
 
