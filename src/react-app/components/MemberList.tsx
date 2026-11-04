@@ -1,20 +1,29 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
+import type { ReactNode } from 'react';
 import { processMemberPhoto } from '../utils/AvatarUtils';
 import {
   Accordion,
-  Anchor,
   Avatar,
   ActionIcon,
   Group,
   Badge,
   Box,
-  SimpleGrid,
+  Select,
   Stack,
   Modal,
   Text,
   TextInput,
 } from '@mantine/core';
 import { useDebouncedValue } from '@mantine/hooks';
+import {
+  IconCalendar,
+  IconBriefcase,
+  IconCoins,
+  IconCreditCard,
+  IconMapPin,
+  IconPhone,
+} from '@tabler/icons-react';
+import { DatePickerInput } from '@mantine/dates';
 import type { Member } from '../types';
 import {
   canRenew,
@@ -22,6 +31,129 @@ import {
   getMemberStatus,
 } from '../utils/MemberUtils';
 import RenewButton from './UpdatePlan';
+
+function MemberDetail({
+  icon,
+  label,
+  value,
+  fullWidth = false,
+  editable = true,
+  editor,
+  onStartEditing,
+  onEditorChange,
+  onCommit,
+  onCancel,
+}: {
+  readonly icon: ReactNode;
+  readonly label: string;
+  readonly value: string;
+  readonly fullWidth?: boolean;
+  readonly editable?: boolean;
+  readonly editor?: {
+    readonly value: string;
+    readonly type: 'text' | 'date' | 'number' | 'select';
+    readonly options?: string[];
+    readonly clearable?: boolean;
+  };
+  readonly onStartEditing?: () => void;
+  readonly onEditorChange?: (value: string | null) => void;
+  readonly onCommit?: (value?: string | null) => void;
+  readonly onCancel?: () => void;
+}) {
+  return (
+    <div
+      className={`member-detail${fullWidth ? ' member-detail--full' : ''}`}
+    >
+      <div className="member-detail-heading">
+        <span className="member-detail-icon">{icon}</span>
+        <Text className="member-detail-label">{label}</Text>
+      </div>
+      {editor ? (
+        editor.type === 'date' ? (
+          <DatePickerInput
+            className="member-detail-editor"
+            aria-label={`Edit ${label}`}
+            value={editor.value}
+            onChange={(value) => {
+              onEditorChange?.(value);
+              onCommit?.(value);
+            }}
+            onKeyDown={(event) => {
+              if (event.key === 'Escape') onCancel?.();
+            }}
+            valueFormat="DD MMM YYYY"
+            clearable={false}
+            popoverProps={{ withinPortal: true }}
+            autoFocus
+          />
+        ) : editor.type === 'select' ? (
+          <Select
+            className="member-detail-editor"
+            aria-label={`Edit ${label}`}
+            data={editor.options ?? []}
+            value={editor.value}
+            onChange={(value) => {
+              onEditorChange?.(value);
+              onCommit?.(value);
+            }}
+            onKeyDown={(event) => {
+              if (event.key === 'Escape') onCancel?.();
+            }}
+            onBlur={() => onCommit?.()}
+            autoFocus
+            clearable={editor.clearable}
+            allowDeselect={editor.clearable}
+          />
+        ) : (
+          <TextInput
+            className="member-detail-editor"
+            aria-label={`Edit ${label}`}
+            type={editor.type}
+            value={editor.value}
+            onChange={(event) => onEditorChange?.(event.currentTarget.value)}
+            onKeyDown={(event) => {
+              if (event.key === 'Enter') {
+                event.preventDefault();
+                onCommit?.();
+              } else if (event.key === 'Escape') {
+                onCancel?.();
+              }
+            }}
+            onBlur={() => onCommit?.()}
+            autoFocus
+            min={editor.type === 'number' ? 1 : undefined}
+            step={editor.type === 'number' ? 1 : undefined}
+          />
+        )
+      ) : (
+        <button
+          type="button"
+          className={`member-detail-value${editable ? ' member-detail-value--editable' : ''}`}
+          onClick={editable ? onStartEditing : undefined}
+          aria-label={editable ? `Edit ${label}: ${value}` : undefined}
+          disabled={!editable}
+        >
+          {value}
+        </button>
+      )}
+    </div>
+  );
+}
+
+type EditableField =
+  | 'phone'
+  | 'address'
+  | 'profession'
+  | 'visitTime'
+  | 'planMonths'
+  | 'startDate'
+  | 'price';
+
+type FieldEditor = {
+  readonly memberId: number;
+  readonly field: EditableField;
+  readonly value: string;
+};
 
 async function fetchMemberPhoto(id: number): Promise<string | null> {
   try {
@@ -87,6 +219,8 @@ export default function MemberList({
   const [photoModalMemberId, setPhotoModalMemberId] = useState<number | null>(
     null,
   );
+  const [editingField, setEditingField] = useState<FieldEditor | null>(null);
+  const savingFieldRef = useRef(false);
 
   const q = debouncedQuery.trim().toLowerCase();
 
@@ -130,6 +264,77 @@ export default function MemberList({
       const error = await response.json().catch(() => null);
       throw new Error(error?.error ?? 'Failed to save photo');
     }
+  };
+
+  const saveMemberField = async (valueOverride?: string | null) => {
+    const currentEdit = editingField;
+    if (currentEdit === null || savingFieldRef.current) return;
+
+    let value: string | null =
+      valueOverride === undefined
+        ? currentEdit.value.trim()
+        : valueOverride?.trim() ?? null;
+
+    if (
+      ['planMonths', 'startDate', 'price']
+        .includes(currentEdit.field) &&
+      !value
+    ) {
+      alert('This field cannot be empty.');
+      return;
+    }
+
+    if (
+      currentEdit.field === 'address' ||
+      currentEdit.field === 'profession' ||
+      currentEdit.field === 'visitTime'
+    ) {
+      value = value || null;
+    }
+
+    savingFieldRef.current = true;
+    try {
+      const response = await fetch(
+        `/api/members/${currentEdit.memberId}/details`,
+        {
+          method: 'PUT',
+          credentials: 'include',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            field: currentEdit.field,
+            value,
+          }),
+        },
+      );
+
+      const data: { message?: string; error?: string } =
+        await response.json();
+
+      if (!response.ok) {
+        alert(data.error ?? 'Failed to update member details');
+        return;
+      }
+
+      setEditingField((current) =>
+        current?.memberId === currentEdit.memberId &&
+          current.field === currentEdit.field
+          ? null
+          : current,
+      );
+      await onMemberUpdated();
+    } catch {
+      alert('Unable to connect to the server. Please try again.');
+    } finally {
+      savingFieldRef.current = false;
+    }
+  };
+
+  const updateEditingValue = (value: string | null) => {
+    setEditingField((current) =>
+      current ? { ...current, value: value ?? '' } : null,
+    );
   };
 
   const photoUrlsRef = useRef<Record<number, string>>({});
@@ -337,6 +542,63 @@ export default function MemberList({
             planLabel = `${m.planMonths} ${unit}`;
           }
 
+          const renderDetail = (
+            field: EditableField,
+            label: string,
+            icon: ReactNode,
+            rawValue: string | null,
+            displayValue = rawValue ?? '—',
+            options?: string[],
+            fullWidth = false,
+            editable = true,
+          ) => {
+            const isEditing =
+              editingField?.memberId === m.id &&
+              editingField.field === field;
+            const editorType: NonNullable<
+              React.ComponentProps<typeof MemberDetail>['editor']
+            >['type'] =
+              field === 'startDate'
+                ? 'date'
+                : field === 'planMonths' || field === 'price'
+                  ? 'number'
+                  : options
+                    ? 'select'
+                    : 'text';
+
+            return (
+              <MemberDetail
+                key={field}
+                icon={icon}
+                label={label}
+                value={displayValue}
+                fullWidth={fullWidth}
+                editable={editable}
+                editor={
+                  isEditing && editingField
+                    ? {
+                        value: editingField.value,
+                        type: editorType,
+                        options,
+                        clearable: field === 'visitTime',
+                      }
+                    : undefined
+                }
+                onStartEditing={() => {
+                  if (savingFieldRef.current) return;
+                  setEditingField({
+                    memberId: m.id,
+                    field,
+                    value: rawValue ?? '',
+                  });
+                }}
+                onEditorChange={updateEditingValue}
+                onCommit={(value) => void saveMemberField(value)}
+                onCancel={() => setEditingField(null)}
+              />
+            );
+          };
+
           return (
             <Accordion.Item
               key={m.id}
@@ -349,12 +611,17 @@ export default function MemberList({
                 }
               }}
             >
-              <Group wrap="nowrap" gap={0} px="sm">
+              <Group
+                wrap="nowrap"
+                gap={0}
+                px="sm"
+                className="member-accordion-header"
+              >
                 <ActionIcon
                   variant="subtle"
                   color="gray"
                   radius="xl"
-                  size={64}
+                  size={68}
                   aria-label={`Add or change ${m.name}'s profile photo`}
                   onClick={(event) => {
                     event.stopPropagation();
@@ -379,7 +646,7 @@ export default function MemberList({
                   <Avatar
                     src={photoPreviews[m.id] ?? null}
                     alt={`${m.name}'s profile photo`}
-                    size={50}
+                    size={52}
                     radius="50%"
                     color="gray"
                     variant="light"
@@ -394,10 +661,10 @@ export default function MemberList({
                   style={{ flex: 1, minWidth: 0 }}
                   pl={4}
                   pr="md"
-                  py={6}
+                  py={4}
                 >
                   <Stack gap={4} align="flex-start">
-                    <Text size="md" fw={600} lineClamp={2}>
+                    <Text className="member-accordion-name" fw={700} lineClamp={2}>
                       {m.name}
                     </Text>
 
@@ -405,9 +672,9 @@ export default function MemberList({
                       color={s.color}
                       variant="light"
                       className={`membership-status membership-status--${s.color}`}
-                      size="md"
-                      radius="sm"
-                      px={4}
+                      size="lg"
+                      radius="xl"
+                      px="sm"
                       styles={{ root: { alignSelf: 'flex-start' } }}
                     >
                       {s.text}
@@ -424,64 +691,78 @@ export default function MemberList({
                   keepExpandedItemInView(String(m.id))
                 }
               >
-                <Stack gap="lg" pt="sm">
-                  <SimpleGrid cols={2} spacing="md">
-                    <Stack gap={6} style={{ minWidth: 0 }}>
-                      <Text size="sm" c="dimmed">
-                        Phone number
-                      </Text>
-
-                      <Anchor
-                        size="md"
-                        fw={500}
-                        href={`tel:${m.phone}`}
-                        style={{ width: 'fit-content' }}
-                      >
-                        {m.phone}
-                      </Anchor>
-                    </Stack>
-
-                    <Stack gap={6} style={{ minWidth: 0 }}>
-                      <Text size="sm" c="dimmed">
-                        Membership plan
-                      </Text>
-
-                      <Text size="md" fw={600}>
-                        {planLabel}
-                      </Text>
-                    </Stack>
-                  </SimpleGrid>
-
-                  <SimpleGrid cols={2} spacing="md">
-                    <Stack gap={6} style={{ minWidth: 0 }}>
-                      <Text size="sm" c="dimmed">
-                        Starts
-                      </Text>
-                      <Text size="md" fw={600}>
-                        {formatDate(m.paymentDate)}
-                      </Text>
-                    </Stack>
-
-                    <Stack gap={6} style={{ minWidth: 0 }}>
-                      <Text size="sm" c="dimmed">
-                        Expires
-                      </Text>
-                      <Text size="md" fw={600}>
-                        {formatDate(m.expiry)}
-                      </Text>
-                    </Stack>
-                  </SimpleGrid>
-
-                  <Group gap="sm" align="center" wrap="wrap">
-                    <Text size="sm" c="dimmed">
-                      Payment method
-                    </Text>
-
-                    <Text size="md" fw={600}>
-                      {m.paymentMode ?? '—'}
-                    </Text>
-                  </Group>
-                </Stack>
+                <div className="member-details">
+                  <div className="member-details-grid">
+                    {renderDetail(
+                      'phone',
+                      'Phone',
+                      <IconPhone size={34} stroke={1.8} />,
+                      m.phone,
+                    )}
+                    {renderDetail(
+                      'price',
+                      'Amount',
+                      <IconCoins size={34} stroke={1.8} />,
+                      m.price === null ? null : String(m.price),
+                      m.price === null
+                        ? '—'
+                        : new Intl.NumberFormat('en-IN', {
+                            style: 'currency',
+                            currency: 'INR',
+                            maximumFractionDigits: 0,
+                          }).format(m.price),
+                      undefined,
+                      false,
+                      m.price !== null,
+                    )}
+                    {renderDetail(
+                      'startDate',
+                      'Starts',
+                      <IconCalendar size={34} stroke={1.8} />,
+                      m.paymentDate,
+                      formatDate(m.paymentDate),
+                      undefined,
+                      false,
+                      m.paymentDate !== null,
+                    )}
+                    {renderDetail(
+                      'planMonths',
+                      'Plan',
+                      <IconCreditCard size={34} stroke={1.8} />,
+                      m.planMonths === null ? null : String(m.planMonths),
+                      planLabel,
+                      Array.from({ length: 12 }, (_, index) =>
+                        String(index + 1),
+                      ),
+                      false,
+                      m.planMonths !== null,
+                    )}
+                    {renderDetail(
+                      'profession',
+                      'Profession',
+                      <IconBriefcase size={34} stroke={1.8} />,
+                      m.profession,
+                      m.profession || '—',
+                    )}
+                    {renderDetail(
+                      'visitTime',
+                      'Usual time',
+                      <IconCalendar size={34} stroke={1.8} />,
+                      m.visitTime,
+                      m.visitTime ?? '—',
+                      ['AM', 'PM'],
+                    )}
+                    {renderDetail(
+                      'address',
+                      'Address',
+                      <IconMapPin size={34} stroke={1.8} />,
+                      m.address,
+                      m.address || '—',
+                      undefined,
+                      true,
+                    )}
+                  </div>
+                </div>
               </Accordion.Panel>
             </Accordion.Item>
           );

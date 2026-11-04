@@ -5,7 +5,13 @@ A small, private dashboard for managing gym memberships and tracking plan renewa
 ## Features
 
 - Password-protected access with session cookies.
-- Create members with a phone number, membership dates, and payment method.
+- Create members with a phone number, address, profession, usual AM/PM visit time,
+  membership dates, and payment method.
+- Edit member details inline one field at a time, including plan, start date,
+  phone, amount, and profile fields. Expiry date and payment method are not
+  editable from the member details view. Editing the plan duration or start
+  date recalculates the expiry date and membership status. Existing members may
+  leave address, profession, and usual visit time blank.
 - Search and browse active members, and filter members whose plans are due or expired.
 - Renew plans or deactivate members; membership and payment history is retained.
 - Add or change member profile photos; images are resized and compressed before upload.
@@ -90,6 +96,7 @@ Login and logout are public endpoints. All other `/api/*` routes require a valid
 | `GET` | `/api/members` | List active members with their latest plan |
 | `GET` | `/api/members/:id` | Get a member |
 | `POST` | `/api/members` | Create a member and initial plan |
+| `PUT` | `/api/members/:id/details` | Update one member or latest-plan field |
 | `POST` | `/api/members/:id/renewals` | Add a plan renewal |
 | `PATCH` | `/api/members/:id` | Deactivate a member |
 | `PUT` | `/api/members/:id/photo` | Save or replace a member photo |
@@ -99,6 +106,8 @@ Login and logout are public endpoints. All other `/api/*` routes require a valid
 
 - `member_details` stores each member and whether they are active.
 - `member_details.photo_data` stores an optional profile photo.
+- `member_details.address`, `profession`, and `visit_time` are nullable for existing
+  records; the New Member form requires all three values.
 - `member_plan_audit` stores plan and payment records; each renewal adds a record rather than overwriting history.
 - `sessions` stores expiring session-token hashes.
 

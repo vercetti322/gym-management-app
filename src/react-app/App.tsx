@@ -266,13 +266,15 @@ function App() {
     <MantineProvider theme={theme} defaultColorScheme="dark">
       <Container size={365} px="md">
         <Stack align="center" gap="md" mih="100dvh" pt="xl">
-          <Title order={1} ta="center" className="brand-accent">
-            Power Bull Gym
-          </Title>
+          <Stack align="center" gap={4}>
+            <Title order={1} ta="center" className="brand-accent">
+              Power Bull Gym
+            </Title>
 
-          <Text ta="center" w="100%" size="lg" c="dimmed">
-            Manage your memberships and get payment reminders.
-          </Text>
+            <Text ta="center" w="100%" size="lg" c="dimmed">
+              Manage your memberships and get payment reminders.
+            </Text>
+          </Stack>
 
           {content}
         </Stack>

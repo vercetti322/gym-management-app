@@ -27,6 +27,9 @@ export default function CreateMemberButton({
   const [opened, setOpened] = useState(false);
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
+  const [address, setAddress] = useState('');
+  const [profession, setProfession] = useState('');
+  const [visitTime, setVisitTime] = useState<'AM' | 'PM' | null>(null);
   const [mode, setMode] = useState('UPI');
   const [from, setFrom] = useState<string | null>(null);
   const [months, setMonths] = useState(1);
@@ -37,6 +40,9 @@ export default function CreateMemberButton({
 
     setName('');
     setPhone('');
+    setAddress('');
+    setProfession('');
+    setVisitTime(null);
     setMode('UPI');
     setFrom(start);
     setMonths(1);
@@ -44,7 +50,15 @@ export default function CreateMemberButton({
   };
 
   const createMember = async () => {
-    if (!name.trim() || !phone.trim() || !from || !endDate) {
+    if (
+      !name.trim() ||
+      !phone.trim() ||
+      !address.trim() ||
+      !profession.trim() ||
+      !visitTime ||
+      !from ||
+      !endDate
+    ) {
       return;
     }
 
@@ -58,6 +72,9 @@ export default function CreateMemberButton({
         body: JSON.stringify({
           name: name.trim(),
           phone: phone.trim(),
+          address: address.trim(),
+          profession: profession.trim(),
+          visitTime,
           startDate: from,
           endDate,
           planDuration: months,
@@ -100,23 +117,60 @@ export default function CreateMemberButton({
       >
         <Stack gap="lg">
           <Stack gap="sm">
+            <SimpleGrid cols={2} spacing="xs">
+              <TextInput
+                placeholder="Full name"
+                value={name}
+                onChange={(event) => setName(event.currentTarget.value)}
+                size="md"
+                required
+              />
+
+              <TextInput
+                placeholder="Phone number"
+                value={phone}
+                onChange={(event) => setPhone(event.currentTarget.value)}
+                size="md"
+                inputMode="numeric"
+                maxLength={10}
+                required
+              />
+            </SimpleGrid>
+
             <TextInput
-              placeholder="Enter full name"
-              value={name}
-              onChange={(event) => setName(event.currentTarget.value)}
+              label="Address"
+              placeholder="Address"
+              value={address}
+              onChange={(event) => setAddress(event.currentTarget.value)}
+              maxLength={600}
               size="md"
               required
             />
 
-            <TextInput
-              placeholder="Enter phone number"
-              value={phone}
-              onChange={(event) => setPhone(event.currentTarget.value)}
-              size="md"
-              inputMode="numeric"
-              maxLength={10}
-              required
-            />
+            <SimpleGrid cols={2} spacing="xs">
+              <TextInput
+                label="Profession"
+                placeholder="Profession"
+                value={profession}
+                onChange={(event) => setProfession(event.currentTarget.value)}
+                maxLength={100}
+                size="md"
+                required
+              />
+
+              <Select
+                label="Usual visit time"
+                placeholder="AM or PM"
+                data={['AM', 'PM']}
+                value={visitTime}
+                onChange={(value) =>
+                  setVisitTime(value === 'AM' || value === 'PM' ? value : null)
+                }
+                allowDeselect={false}
+                size="md"
+                required
+              />
+            </SimpleGrid>
           </Stack>
 
           <SimpleGrid cols={2} spacing="xs">
@@ -181,6 +235,9 @@ export default function CreateMemberButton({
             disabled={
               !name.trim() ||
               !phone.trim() ||
+              !address.trim() ||
+              !profession.trim() ||
+              !visitTime ||
               !endDate ||
               !/^\d{10}$/.test(phone)
             }

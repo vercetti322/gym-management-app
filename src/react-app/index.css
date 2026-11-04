@@ -145,6 +145,127 @@ body {
   color: var(--status-neutral-text) !important;
 }
 
+.member-accordion-header {
+  min-height: 104px;
+}
+
+.member-accordion-name {
+  font-size: clamp(1.4rem, 3.4vw, 2rem);
+  line-height: 1.15;
+}
+
+.membership-status {
+  font-size: 0.75rem;
+  text-transform: none;
+  white-space: nowrap;
+}
+
+.member-details {
+  container-type: inline-size;
+  padding: 8px 14px;
+  border: 1px solid rgba(170, 187, 221, 0.22);
+  border-radius: 20px;
+  background: linear-gradient(
+    145deg,
+    rgba(31, 49, 82, 0.7),
+    rgba(20, 34, 62, 0.55)
+  );
+}
+
+.member-details-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.member-detail {
+  display: grid;
+  grid-template-rows: auto auto;
+  min-width: 0;
+  min-height: 112px;
+  align-content: center;
+  padding: 20px 14px;
+}
+
+.member-detail:nth-child(n + 3) {
+  border-top: 1px solid rgba(170, 187, 221, 0.22);
+}
+
+.member-detail--full {
+  grid-column: 1 / -1;
+}
+
+.member-detail-icon {
+  display: flex;
+  flex: 0 0 24px;
+  align-items: center;
+  justify-content: center;
+  color: #8fc5ff;
+}
+
+.member-detail-icon svg {
+  width: 20px;
+  height: 20px;
+}
+
+.member-detail-heading {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 4px;
+}
+
+.member-detail-label {
+  color: var(--app-muted);
+  font-size: 1.1rem;
+  line-height: 1.35;
+}
+
+.member-detail-value {
+  display: block;
+  width: fit-content;
+  max-width: 100%;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  font-family: inherit;
+  text-align: left;
+  cursor: pointer;
+  overflow-wrap: anywhere;
+  color: var(--app-text);
+  font-size: 1.25rem;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+.member-detail-value:disabled {
+  color: var(--app-text);
+  cursor: default;
+}
+
+.member-detail-editor {
+  min-width: 0;
+  margin-inline: 8px;
+}
+
+.member-detail-editor .mantine-Input-input {
+  width: 100%;
+  min-width: 0;
+  padding-inline: 6px;
+  font-size: 0.9rem;
+}
+
+.member-detail-phone {
+  color: #718bff;
+  font-size: inherit;
+  font-weight: inherit;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.member-detail-phone:hover {
+  text-decoration: underline;
+}
+
 .payment-qr {
   padding: 8px;
   border-radius: 8px;
@@ -154,6 +275,42 @@ body {
 @media (max-width: 767px) {
   .mantine-Modal-content {
     max-height: calc(100dvh - 24px);
+  }
+
+  .member-detail {
+    padding-inline: 8px;
+  }
+
+  .member-detail-icon svg {
+    width: 20px;
+    height: 20px;
+  }
+
+  .member-detail-label {
+    font-size: 0.9rem;
+  }
+
+  .member-detail-value {
+    font-size: 0.98rem;
+  }
+}
+
+@media (max-width: 479px) {
+  .member-accordion-header {
+    min-height: 72px;
+  }
+
+  .member-accordion-name {
+    font-size: 1.25rem;
+  }
+
+  .member-details {
+    padding: 4px 6px;
+  }
+
+  .member-detail {
+    min-height: 96px;
+    padding-block: 12px;
   }
 }
 

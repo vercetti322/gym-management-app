@@ -8,7 +8,11 @@ export const GET_ALL_MEMBERS = `
       ELSE 0
     END AS hasPhoto,
     md.is_active AS isActive,
+    md.address,
+    md.profession,
+    md.visit_time AS visitTime,
     mpa.plan_duration AS planMonths,
+    mpa.price,
     mpa.end_date AS expiry,
     CASE
       WHEN mpa.audit_id IS NOT NULL THEN 1
@@ -31,7 +35,7 @@ export const GET_ALL_MEMBERS = `
       SELECT audit_id
       FROM member_plan_audit
       WHERE member_id = md.member_id
-      ORDER BY end_date DESC, audit_id DESC
+      ORDER BY audit_id DESC
       LIMIT 1
     )
   WHERE md.is_active = 1
@@ -44,7 +48,11 @@ export const GET_A_MEMBER = `
     md.name,
     md.phone,
     md.is_active AS isActive,
+    md.address,
+    md.profession,
+    md.visit_time AS visitTime,
     mpa.plan_duration AS planMonths,
+    mpa.price,
     mpa.end_date AS expiry,
     CASE
       WHEN mpa.audit_id IS NOT NULL THEN 1
@@ -67,7 +75,7 @@ export const GET_A_MEMBER = `
       SELECT audit_id
       FROM member_plan_audit
       WHERE member_id = md.member_id
-      ORDER BY end_date DESC, audit_id DESC
+      ORDER BY audit_id DESC
       LIMIT 1
     )
   WHERE md.member_id = ?
@@ -92,8 +100,77 @@ export const RENEW_MEMBER_PLAN = `
 `;
 
 export const INSERT_MEMBER = `
-  INSERT INTO member_details (name, phone)
-  VALUES (?, ?)
+  INSERT INTO member_details (name, phone, address, profession, visit_time)
+  VALUES (?, ?, ?, ?, ?)
+`;
+
+export const UPDATE_MEMBER_ADDRESS = `
+  UPDATE member_details
+  SET address = ?
+  WHERE member_id = ? AND is_active = 1
+`;
+
+export const UPDATE_MEMBER_PROFESSION = `
+  UPDATE member_details
+  SET profession = ?
+  WHERE member_id = ? AND is_active = 1
+`;
+
+export const UPDATE_MEMBER_VISIT_TIME = `
+  UPDATE member_details
+  SET visit_time = ?
+  WHERE member_id = ? AND is_active = 1
+`;
+
+export const GET_ACTIVE_MEMBER = `
+  SELECT member_id
+  FROM member_details
+  WHERE member_id = ? AND is_active = 1
+`;
+
+export const PHONE_IN_USE = `
+  SELECT member_id
+  FROM member_details
+  WHERE phone = ? AND member_id != ?
+  LIMIT 1
+`;
+
+export const UPDATE_MEMBER_PHONE = `
+  UPDATE member_details
+  SET phone = ?
+  WHERE member_id = ? AND is_active = 1
+`;
+
+export const GET_LATEST_PLAN_TERM = `
+  SELECT start_date AS startDate, plan_duration AS planDuration
+  FROM member_plan_audit
+  WHERE member_id = ?
+  ORDER BY audit_id DESC
+  LIMIT 1
+`;
+
+export const UPDATE_LATEST_PLAN_TERM = `
+  UPDATE member_plan_audit
+  SET start_date = ?, end_date = ?, plan_duration = ?
+  WHERE audit_id = (
+    SELECT audit_id
+    FROM member_plan_audit
+    WHERE member_id = ?
+    ORDER BY audit_id DESC
+    LIMIT 1
+  )
+`;
+
+export const UPDATE_LATEST_PLAN_PRICE = `
+  UPDATE member_plan_audit
+  SET price = ?
+  WHERE audit_id = (
+    SELECT audit_id
+    FROM member_plan_audit
+    WHERE member_id = ?
+    ORDER BY audit_id DESC
+    LIMIT 1
+  )
 `;
 
 export const INSERT_MEMBER_PLAN = `
