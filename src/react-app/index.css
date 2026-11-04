@@ -199,7 +199,7 @@ body {
   flex: 0 0 24px;
   align-items: center;
   justify-content: center;
-  color: #8fc5ff;
+  color: var(--app-accent);
 }
 
 .member-detail-icon svg {
