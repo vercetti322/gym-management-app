@@ -163,18 +163,17 @@ body {
 .member-details {
   container-type: inline-size;
   padding: 8px 14px;
-  border: 1px solid rgba(170, 187, 221, 0.22);
   border-radius: 20px;
-  background: linear-gradient(
-    145deg,
-    rgba(31, 49, 82, 0.7),
-    rgba(20, 34, 62, 0.55)
-  );
 }
 
 .member-details-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
+  column-gap: 14px;
+}
+
+.mantine-Accordion-item[data-active='true'] {
+  border-color: transparent !important;
 }
 
 .member-detail {
@@ -186,12 +185,15 @@ body {
   padding: 20px 14px;
 }
 
-.member-detail:nth-child(n + 3) {
-  border-top: 1px solid rgba(170, 187, 221, 0.22);
-}
-
 .member-detail--full {
   grid-column: 1 / -1;
+}
+
+.member-detail-content {
+  display: grid;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
 }
 
 .member-detail-icon {
@@ -216,7 +218,7 @@ body {
 
 .member-detail-label {
   color: var(--app-muted);
-  font-size: 1.1rem;
+  font-size: 1.15rem;
   line-height: 1.35;
 }
 
@@ -232,7 +234,7 @@ body {
   cursor: pointer;
   overflow-wrap: anywhere;
   color: var(--app-text);
-  font-size: 1.25rem;
+  font-size: 1.3rem;
   font-weight: 600;
   line-height: 1.4;
 }
@@ -243,8 +245,8 @@ body {
 }
 
 .member-detail-editor {
+  width: 100%;
   min-width: 0;
-  margin-inline: 8px;
 }
 
 .member-detail-editor .mantine-Input-input {
@@ -287,17 +289,21 @@ body {
   }
 
   .member-detail-label {
-    font-size: 0.9rem;
+    font-size: 0.95rem;
   }
 
   .member-detail-value {
-    font-size: 0.98rem;
+    font-size: 1.04rem;
   }
 }
 
 @media (max-width: 479px) {
   .member-accordion-header {
     min-height: 72px;
+  }
+
+  .mantine-Accordion-item .mantine-Accordion-content {
+    padding-inline: 8px;
   }
 
   .member-accordion-name {

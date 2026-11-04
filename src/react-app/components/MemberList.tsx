@@ -64,78 +64,80 @@ function MemberDetail({
     <div
       className={`member-detail${fullWidth ? ' member-detail--full' : ''}`}
     >
-      <div className="member-detail-heading">
-        <span className="member-detail-icon">{icon}</span>
-        <Text className="member-detail-label">{label}</Text>
-      </div>
-      {editor ? (
-        editor.type === 'date' ? (
-          <DatePickerInput
-            className="member-detail-editor"
-            aria-label={`Edit ${label}`}
-            value={editor.value}
-            onChange={(value) => {
-              onEditorChange?.(value);
-              onCommit?.(value);
-            }}
-            onKeyDown={(event) => {
-              if (event.key === 'Escape') onCancel?.();
-            }}
-            valueFormat="DD MMM YYYY"
-            clearable={false}
-            popoverProps={{ withinPortal: true }}
-            autoFocus
-          />
-        ) : editor.type === 'select' ? (
-          <Select
-            className="member-detail-editor"
-            aria-label={`Edit ${label}`}
-            data={editor.options ?? []}
-            value={editor.value}
-            onChange={(value) => {
-              onEditorChange?.(value);
-              onCommit?.(value);
-            }}
-            onKeyDown={(event) => {
-              if (event.key === 'Escape') onCancel?.();
-            }}
-            onBlur={() => onCommit?.()}
-            autoFocus
-            clearable={editor.clearable}
-            allowDeselect={editor.clearable}
-          />
+      <div className="member-detail-content">
+        <div className="member-detail-heading">
+          <span className="member-detail-icon">{icon}</span>
+          <Text className="member-detail-label">{label}</Text>
+        </div>
+        {editor ? (
+          editor.type === 'date' ? (
+            <DatePickerInput
+              className="member-detail-editor"
+              aria-label={`Edit ${label}`}
+              value={editor.value}
+              onChange={(value) => {
+                onEditorChange?.(value);
+                onCommit?.(value);
+              }}
+              onKeyDown={(event) => {
+                if (event.key === 'Escape') onCancel?.();
+              }}
+              valueFormat="DD MMM YYYY"
+              clearable={false}
+              popoverProps={{ withinPortal: true }}
+              autoFocus
+            />
+          ) : editor.type === 'select' ? (
+            <Select
+              className="member-detail-editor"
+              aria-label={`Edit ${label}`}
+              data={editor.options ?? []}
+              value={editor.value}
+              onChange={(value) => {
+                onEditorChange?.(value);
+                onCommit?.(value);
+              }}
+              onKeyDown={(event) => {
+                if (event.key === 'Escape') onCancel?.();
+              }}
+              onBlur={() => onCommit?.()}
+              autoFocus
+              clearable={editor.clearable}
+              allowDeselect={editor.clearable}
+            />
+          ) : (
+            <TextInput
+              className="member-detail-editor"
+              aria-label={`Edit ${label}`}
+              type={editor.type}
+              value={editor.value}
+              onChange={(event) => onEditorChange?.(event.currentTarget.value)}
+              onKeyDown={(event) => {
+                if (event.key === 'Enter') {
+                  event.preventDefault();
+                  onCommit?.();
+                } else if (event.key === 'Escape') {
+                  onCancel?.();
+                }
+              }}
+              onBlur={() => onCommit?.()}
+              autoFocus
+              min={editor.type === 'number' ? 1 : undefined}
+              step={editor.type === 'number' ? 1 : undefined}
+            />
+          )
         ) : (
-          <TextInput
-            className="member-detail-editor"
-            aria-label={`Edit ${label}`}
-            type={editor.type}
-            value={editor.value}
-            onChange={(event) => onEditorChange?.(event.currentTarget.value)}
-            onKeyDown={(event) => {
-              if (event.key === 'Enter') {
-                event.preventDefault();
-                onCommit?.();
-              } else if (event.key === 'Escape') {
-                onCancel?.();
-              }
-            }}
-            onBlur={() => onCommit?.()}
-            autoFocus
-            min={editor.type === 'number' ? 1 : undefined}
-            step={editor.type === 'number' ? 1 : undefined}
-          />
-        )
-      ) : (
-        <button
-          type="button"
-          className={`member-detail-value${editable ? ' member-detail-value--editable' : ''}`}
-          onClick={editable ? onStartEditing : undefined}
-          aria-label={editable ? `Edit ${label}: ${value}` : undefined}
-          disabled={!editable}
-        >
-          {value}
-        </button>
-      )}
+          <button
+            type="button"
+            className={`member-detail-value${editable ? ' member-detail-value--editable' : ''}`}
+            onClick={editable ? onStartEditing : undefined}
+            aria-label={editable ? `Edit ${label}: ${value}` : undefined}
+            disabled={!editable}
+          >
+            {value}
+          </button>
+        )}
+      </div>
     </div>
   );
 }
