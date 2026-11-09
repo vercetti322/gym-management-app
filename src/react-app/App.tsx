@@ -225,7 +225,7 @@ function App() {
   } else {
     content = (
       <>
-        <Group gap="sm">
+        <Group gap="xs" className="member-actions">
           <NewMember onCreated={loadMembers} />
 
           {dueOnly ? (
@@ -234,7 +234,7 @@ function App() {
             </Button>
           ) : (
             <Button variant="outline" onClick={() => setDueOnly(true)}>
-              Payments Due
+              Pending
             </Button>
           )}
 
@@ -264,7 +264,7 @@ function App() {
 
   return (
     <MantineProvider theme={theme} defaultColorScheme="dark">
-      <Container size={365} px="md">
+      <Container size={370} px="md">
         <Stack align="center" gap="md" mih="100dvh" pt="xl">
           <Stack align="center" gap={4}>
             <Title order={1} ta="center" className="brand-accent">
@@ -272,7 +272,7 @@ function App() {
             </Title>
 
             <Text ta="center" w="100%" size="lg" c="dimmed">
-              Manage your memberships and get payment reminders.
+              Manage your gym members
             </Text>
           </Stack>
 

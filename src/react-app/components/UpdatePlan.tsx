@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import {
+  ActionIcon,
   Button,
   Image,
   Modal,
@@ -10,6 +11,7 @@ import {
   Text,
   Tooltip,
 } from '@mantine/core';
+import { IconPencil } from '@tabler/icons-react';
 import { DatePickerInput } from '@mantine/dates';
 import '@mantine/core/styles.css';
 import '@mantine/dates/styles.css';
@@ -123,25 +125,33 @@ export default function RenewButton({
         events={{ hover: true, focus: true, touch: true }}
       >
         <div>
-          <Button
-            color="blue"
-            autoContrast
-            size="sm"
-            fz="sm"
-            h={40}
+          <ActionIcon
+            color="orange"
+            variant="subtle"
+            size={40}
+            aria-label={`Update ${member.name}'s plan`}
+            className="member-plan-edit"
+            styles={{
+              root: {
+                color: 'var(--app-accent)',
+                backgroundColor: 'transparent',
+                '&:hover': { backgroundColor: 'transparent' },
+              },
+            }}
             disabled={!enabled}
             onClick={open}
           >
-            Update
-          </Button>
+            <IconPencil size={26} />
+          </ActionIcon>
         </div>
       </Tooltip>
 
       <Modal
+        classNames={{ header: 'renew-modal-header' }}
         opened={opened}
         onClose={() => setOpened(false)}
         title={
-          <Text fz="xl" fw={700}>
+          <Text fz="lg" fw={700} style={{ whiteSpace: 'nowrap' }}>
             {member.name}
           </Text>
         }
@@ -164,7 +174,14 @@ export default function RenewButton({
 
           {isRenew ? (
             <>
-              <SimpleGrid cols={2} spacing="xs">
+              <SimpleGrid
+                cols={2}
+                spacing="xs"
+                w="100%"
+                style={{
+                  gridTemplateColumns: 'max-content minmax(0, 1fr)',
+                }}
+              >
                 <DatePickerInput
                   label="Start date"
                   valueFormat="DD MMM YYYY"
@@ -173,11 +190,22 @@ export default function RenewButton({
                   size="md"
                   clearable={false}
                   styles={{
-                    input: { fontSize: '13.9px' },
+                    root: { width: 'max-content', minWidth: 0 },
+                    input: {
+                      boxSizing: 'border-box',
+                      width: 'max-content',
+                      minWidth: 'max-content',
+                      paddingInline: '13px',
+                      fontSize: '16px',
+                      whiteSpace: 'nowrap',
+                      textAlign: 'left',
+                    },
+                    label: { fontSize: '0.95rem', fontWeight: 400 },
                   }}
                 />
 
                 <Select
+                  w="100%"
                   label="Months"
                   data={planMonthOptions}
                   value={String(months)}
@@ -185,25 +213,23 @@ export default function RenewButton({
                   comboboxProps={{ width: 'target' }}
                   allowDeselect={false}
                   size="md"
+                  styles={{
+                    label: { fontSize: '0.95rem', fontWeight: 400 },
+                  }}
                 />
               </SimpleGrid>
 
-              <Stack gap="xs">
-                <Text size="sm" fw={500}>
-                  Payment method
-                </Text>
-
-                <SegmentedControl
-                  color="blue"
-                  fullWidth
-                  value={mode}
-                  onChange={setMode}
-                  data={[
-                    { label: 'UPI', value: 'UPI' },
-                    { label: 'Cash', value: 'Cash' },
-                  ]}
-                />
-              </Stack>
+              <SegmentedControl
+                aria-label="Payment method"
+                color="blue"
+                fullWidth
+                value={mode}
+                onChange={setMode}
+                data={[
+                  { label: 'UPI', value: 'UPI' },
+                  { label: 'Cash', value: 'Cash' },
+                ]}
+              />
 
               {mode === 'UPI' && (
                 <Image

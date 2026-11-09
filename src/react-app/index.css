@@ -105,6 +105,10 @@ body {
   background: transparent !important;
 }
 
+.renew-modal-header {
+  padding-bottom: 4px;
+}
+
 .photo-change-button {
   width: fit-content;
   padding: 10px 16px;
@@ -149,9 +153,19 @@ body {
   min-height: 104px;
 }
 
+.member-plan-edit:disabled {
+  opacity: 0.4;
+}
+
 .member-accordion-name {
   font-size: clamp(1.4rem, 3.4vw, 2rem);
   line-height: 1.15;
+}
+
+@media (max-width: 359px) {
+  .member-actions .mantine-Button-root {
+    padding-inline: 7px;
+  }
 }
 
 .membership-status {

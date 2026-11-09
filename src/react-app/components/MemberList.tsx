@@ -521,6 +521,7 @@ export default function MemberList({
         radius="md"
         value={openId}
         onChange={setOpenId}
+        chevron={null}
         styles={{
           item: {
             border: '1px solid var(--app-border)',
@@ -534,7 +535,7 @@ export default function MemberList({
           },
         }}
       >
-        {sorted.map((m) => {
+        {sorted.map((m, index) => {
           const s = getMemberStatus(m);
 
           let planLabel = 'No plan';
@@ -661,27 +662,29 @@ export default function MemberList({
                 </ActionIcon>
                 <Accordion.Control
                   style={{ flex: 1, minWidth: 0 }}
-                  pl={4}
+                  pl={10}
                   pr="md"
                   py={4}
                 >
-                  <Stack gap={4} align="flex-start">
-                    <Text className="member-accordion-name" fw={700} lineClamp={1}>
-                      {m.name}
-                    </Text>
+                  <Group wrap="nowrap" gap="xs">
+                    <Stack gap={4} align="flex-start" style={{ minWidth: 0 }}>
+                      <Text className="member-accordion-name" fw={700} lineClamp={1}>
+                        {`${index + 1}. ${m.name}`}
+                      </Text>
 
-                    <Badge
-                      color={s.color}
-                      variant="light"
-                      className={`membership-status membership-status--${s.color}`}
-                      size="lg"
-                      radius="xl"
-                      px="sm"
-                      styles={{ root: { alignSelf: 'flex-start' } }}
-                    >
-                      {s.text}
-                    </Badge>
-                  </Stack>
+                      <Badge
+                        color={s.color}
+                        variant="light"
+                        className={`membership-status membership-status--${s.color}`}
+                        size="lg"
+                        radius="xl"
+                        px="sm"
+                        styles={{ root: { alignSelf: 'flex-start' } }}
+                      >
+                        {s.text}
+                      </Badge>
+                    </Stack>
+                  </Group>
                 </Accordion.Control>
                 <Group gap={0} wrap="nowrap" style={{ flexShrink: 0 }}>
                   <RenewButton member={m} onUpdated={onMemberUpdated} />
